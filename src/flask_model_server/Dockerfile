@@ -1,30 +1,35 @@
-# Imagem base com CUDA e cuDNN (Ubuntu 20.04)
-FROM nvidia/cuda:11.6.1-cudnn8-runtime-ubuntu20.04
+# Use standard Ubuntu 22.04
+FROM ubuntu:22.04
 
-# Instala dependências do sistema e Python
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install system dependencies and Python
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
+    python3-dev \
+    build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Define o diretório de trabalho dentro do container
+# Define the working directory
 WORKDIR /app
 
-# Copia o arquivo de dependências e instala as bibliotecas necessárias
+# Copy requirements and install Python packages
 COPY requirements.txt .
-RUN pip3 install --upgrade pip && pip3 install -r requirements.txt
+RUN pip3 install --upgrade pip && \
+    pip3 install -r requirements.txt
 
+# Copy configuration and source code
 COPY default_params.txt /storage/params/params.txt
-
-# Copia todo o código fonte para dentro do container
 COPY . .
 
-# Define as variáveis de ambiente para o Flask
+# Set Flask environment variables
 ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
 
-# Expõe a porta 5000 (onde a aplicação Flask irá rodar)
+# Expose port
 EXPOSE 5000
 
-# Comando para iniciar a aplicação Flask
+# Start Flask
 CMD ["flask", "run"]
