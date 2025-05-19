@@ -11,14 +11,21 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '8'
-          memory: 16G
+          cpus: '12'
+          memory: 24G
+          memory-swap: 48G
         reservations:
-          cpus: '4'
-          memory: 8G
+          cpus: '6'
+          memory: 12G
     environment:
       - LOCAL_RUN=false
       - PYTHONUNBUFFERED=1
       - OMP_NUM_THREADS=4
       - MKL_NUM_THREADS=4
+      - JOBLIB_TEMP_FOLDER=/tmp
+      - JOBLIB_MAX_NBYTES=1G
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
     restart: unless-stopped 
