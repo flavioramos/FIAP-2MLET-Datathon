@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  mlflow:
+    build: .
+    volumes:
+      - ./storage:/storage
+    networks:
+      - mlflow-network
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./auth/.htpasswd:/etc/nginx/.htpasswd:ro
+    depends_on:
+      - mlflow
+    networks:
+      - mlflow-network
+
+networks:
+  mlflow-network:
+    driver: bridge 

@@ -21,10 +21,6 @@ RUN mkdir -p auth && \
 
 EXPOSE 5001
 
-# Set environment variables for authentication
-ENV MLFLOW_TRACKING_USERNAME=teacher
-ENV MLFLOW_TRACKING_PASSWORD=mlet-password
-
 # Comando para iniciar a aplicação Flask
 CMD ["mlflow", "server", \
      "--backend-store-uri", "sqlite:////storage/mlflow_logs/mlflow.db", \
