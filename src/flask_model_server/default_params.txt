@@ -35,6 +35,6 @@ GRID_SEARCH_C_VALUES=[0.1,1,5]
 
 [Authentication]
 # Authentication
-DEFAULT_USERNAME=user
-DEFAULT_PASSWORD=password
+DEFAULT_USERNAME=teacher
+DEFAULT_PASSWORD=mlet-password
 JWT_SECRET_KEY=your-super-secret-key-change-in-production

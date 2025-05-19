@@ -25,6 +25,9 @@ jwt = JWTManager(app)
 DEFAULT_USERNAME = config.get('Authentication', 'DEFAULT_USERNAME', fallback='user')
 DEFAULT_PASSWORD = config.get('Authentication', 'DEFAULT_PASSWORD', fallback='password')
 
+# Training state management
+training_in_progress = False
+
 @app.route("/login", methods=["POST"])
 def login():
     """Login endpoint to get JWT token.
@@ -56,8 +59,17 @@ def train():
     Returns:
         tuple: JSON response with training results and HTTP status code
     """
-    result = run_training()
-    return jsonify(result), 200
+    global training_in_progress
+    
+    if training_in_progress:
+        return jsonify({"error": "Training is already in progress"}), 409
+    
+    try:
+        training_in_progress = True
+        result = run_training()
+        return jsonify(result), 200
+    finally:
+        training_in_progress = False
 
 @app.route("/predict", methods=["POST"])
 @jwt_required()
