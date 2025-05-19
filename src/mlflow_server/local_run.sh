@@ -13,11 +13,11 @@ ARTIFACT_PATH="$THREE_LEVELS_UP/local_storage/training_artifacts"
 
 echo "DB_PATH: ${DB_PATH}"
 echo "ARTIFACT_PATH: ${ARTIFACT_PATH}"
-
 # Inicia o servidor MLflow utilizando os caminhos construídos.
 mlflow server \
   --backend-store-uri sqlite:///"${DB_PATH}" \
   --default-artifact-root file:///"${ARTIFACT_PATH}" \
+  --app-name basic-auth \
   --host 0.0.0.0 \
   --port 5001
 
