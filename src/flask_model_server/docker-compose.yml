@@ -12,11 +12,10 @@ services:
       resources:
         limits:
           cpus: '12'
-          memory: 24G
-          memory-swap: 48G
+          memory: 32G
         reservations:
           cpus: '6'
-          memory: 12G
+          memory: 16G
     environment:
       - LOCAL_RUN=false
       - PYTHONUNBUFFERED=1
