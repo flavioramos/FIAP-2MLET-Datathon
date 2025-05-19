@@ -27,4 +27,7 @@ CMD ["mlflow", "server", \
      "--default-artifact-root", "file:////storage/training_artifacts", \
      "--host", "0.0.0.0", \
      "--port", "5001", \
-     "--basic-auth", "teacher:mlet-password"]
+     "--app-name", "mlflow", \
+     "--workers", "1", \
+     "--gunicorn-opts", "--access-logfile=- --error-logfile=- --log-level=info --timeout=120 --workers=1 --threads=8 --worker-class=gthread", \
+     "--auth", "teacher:mlet-password"]
