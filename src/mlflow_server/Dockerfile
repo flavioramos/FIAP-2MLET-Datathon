@@ -21,7 +21,11 @@ RUN mkdir -p auth && \
 
 EXPOSE 5001
 
-# Comando para iniciar a aplicação Flask com autenticação
+# Set environment variables for authentication
+ENV MLFLOW_TRACKING_USERNAME=teacher
+ENV MLFLOW_TRACKING_PASSWORD=mlet-password
+
+# Comando para iniciar a aplicação Flask
 CMD ["mlflow", "server", \
      "--backend-store-uri", "sqlite:////storage/mlflow_logs/mlflow.db", \
      "--default-artifact-root", "file:////storage/training_artifacts", \
@@ -29,5 +33,4 @@ CMD ["mlflow", "server", \
      "--port", "5001", \
      "--app-name", "mlflow", \
      "--workers", "1", \
-     "--gunicorn-opts", "--access-logfile=- --error-logfile=- --log-level=info --timeout=120 --workers=1 --threads=8 --worker-class=gthread", \
-     "--auth", "teacher:mlet-password"]
+     "--gunicorn-opts", "--access-logfile=- --error-logfile=- --log-level=info --timeout=120 --workers=1 --threads=8 --worker-class=gthread"]
