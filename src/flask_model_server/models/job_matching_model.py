@@ -4,6 +4,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.pipeline import Pipeline
+import joblib
+import numpy as np
 from utils.config_loader import load_parameters
 from config import (
     STATUS_MAP,
@@ -22,6 +24,9 @@ from config import (
     LOGISTIC_REGRESSION_MAX_ITER,
 )
 
+# Configure joblib to use less memory
+joblib.parallel.BACKEND = 'loky'
+joblib.parallel.DEFAULT_N_JOBS = GRID_SEARCH_N_JOBS
 
 def create_pipeline(params):
     """Create the machine learning pipeline for job matching.
@@ -36,17 +41,20 @@ def create_pipeline(params):
         ("tfidf_ativ", TfidfVectorizer(
             max_features=TFIDF_JOB_DESCRIPTION_MAX_FEATURES,
             ngram_range=TFIDF_JOB_DESCRIPTION_NGRAM_RANGE,
-            strip_accents="unicode" 
+            strip_accents="unicode",
+            dtype=np.float32  # Use float32 to reduce memory usage
         ), "job_description"),
         ("tfidf_comp", TfidfVectorizer(
             max_features=TFIDF_JOB_REQUIREMENTS_MAX_FEATURES,
             ngram_range=TFIDF_JOB_REQUIREMENTS_NGRAM_RANGE,
-            strip_accents="unicode" 
+            strip_accents="unicode",
+            dtype=np.float32  # Use float32 to reduce memory usage
         ), "job_requirements"),
         ("tfidf_cv", TfidfVectorizer(
             max_features=TFIDF_CANDIDATE_CV_MAX_FEATURES,
             ngram_range=TFIDF_CANDIDATE_CV_NGRAM_RANGE,
-            strip_accents="unicode" 
+            strip_accents="unicode",
+            dtype=np.float32  # Use float32 to reduce memory usage
         ), "candidate_cv"),
     ], remainder="drop")
 
@@ -91,22 +99,28 @@ def train_model(df):
     print(f"Performing {GRID_SEARCH_CV}-fold cross-validation...")
     print("Progress will be shown below:")
 
-    grid = GridSearchCV(
-        pipeline,
-        {"clf__C": GRID_SEARCH_C_VALUES},
-        cv=GRID_SEARCH_CV,
-        scoring=GRID_SEARCH_SCORING,
-        n_jobs=GRID_SEARCH_N_JOBS,
-        verbose=1
-    )
+    try:
+        grid = GridSearchCV(
+            pipeline,
+            {"clf__C": GRID_SEARCH_C_VALUES},
+            cv=GRID_SEARCH_CV,
+            scoring=GRID_SEARCH_SCORING,
+            n_jobs=GRID_SEARCH_N_JOBS,
+            verbose=1,
+            error_score='raise'  # Raise error instead of using error_score
+        )
 
-    grid.fit(X_train, y_train)
-    print(f"\nBest C value: {grid.best_params_['clf__C']}")
-    print(f"Best cross-validation score: {grid.best_score_:.4f}")
+        grid.fit(X_train, y_train)
+        print(f"\nBest C value: {grid.best_params_['clf__C']}")
+        print(f"Best cross-validation score: {grid.best_score_:.4f}")
 
-    print("\n=== Evaluating Model ===")
-    y_pred = grid.predict_proba(X_test)[:, 1]
-    auc = roc_auc_score(y_test, y_pred)
+        print("\n=== Evaluating Model ===")
+        y_pred = grid.predict_proba(X_test)[:, 1]
+        auc = roc_auc_score(y_test, y_pred)
 
-    return auc, grid, X_test, y_test
+        return auc, grid, X_test, y_test
+
+    except Exception as e:
+        print(f"\nError during training: {str(e)}")
+        raise
 
