@@ -30,7 +30,4 @@ CMD ["mlflow", "server", \
      "--backend-store-uri", "sqlite:////storage/mlflow_logs/mlflow.db", \
      "--default-artifact-root", "file:////storage/training_artifacts", \
      "--host", "0.0.0.0", \
-     "--port", "5001", \
-     "--app-name", "mlflow", \
-     "--workers", "1", \
-     "--gunicorn-opts", "--access-logfile=- --error-logfile=- --log-level=info --timeout=120 --workers=1 --threads=8 --worker-class=gthread"]
+     "--port", "5001"]
