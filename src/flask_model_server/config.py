@@ -7,6 +7,7 @@ used throughout the application for both local and containerized environments.
 import os
 import sys
 import shutil
+from utils.data_utils import download_and_extract_data, ensure_data_directory, get_data_file_paths
 
 
 # Environment detection
@@ -21,10 +22,12 @@ if LOCAL:
     ARTIFACTS_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../local_storage/training_artifacts"))
     LOGS_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../local_storage/mlflow_logs"))
     PARAMS_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../local_storage/parameters"))
+    DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../local_storage/data"))
 else:
     ARTIFACTS_DIR = os.path.abspath(os.path.join("/storage/", "training_artifacts"))
     LOGS_DIR = os.path.abspath(os.path.join("/storage/", "mlflow_logs"))
     PARAMS_DIR = os.path.abspath(os.path.join("/storage/", "parameters"))
+    DATA_DIR = os.path.abspath(os.path.join("/storage/", "data"))
 
 
 # Create necessary directories
@@ -42,10 +45,16 @@ if not os.path.exists(os.path.join(PARAMS_DIR, "params.txt")):
     print(f"Default params.txt copied to {PARAMS_DIR}")
 
 
+# Ensure data directory exists and download data if needed
+ensure_data_directory(DATA_DIR)
+download_and_extract_data(DATA_DIR, PARAMS_DIR)
+
+
 # Print directory paths
 print(f"ARTIFACTS_DIR: {ARTIFACTS_DIR}")
 print(f"LOGS_DIR: {LOGS_DIR}")
 print(f"PARAMS_DIR: {PARAMS_DIR}")
+print(f"DATA_DIR: {DATA_DIR}")
 
 
 # Generated file paths
@@ -109,6 +118,7 @@ GRID_SEARCH_C_VALUES = [0.1, 1, 10]
 
 
 # Data paths
-APPLICANTS_PATH = "../../data/raw/applicants.json"
-VAGAS_PATH = "../../data/raw/vagas.json"
-PROSPECTS_PATH = "../../data/raw/prospects.json"
+data_paths = get_data_file_paths(DATA_DIR)
+APPLICANTS_PATH = data_paths['applicants']
+VAGAS_PATH = data_paths['vagas']
+PROSPECTS_PATH = data_paths['prospects']

@@ -3,6 +3,9 @@
 MODEL_VERSION=0
 
 [Training]
+# Data source
+DATA_GDRIVE_FILE_ID=14RDmgVVHg6limnuS14PXaI3lHVP_gd1z
+
 # Training parameters
 TEST_SIZE=0.2
 RANDOM_STATE=42
