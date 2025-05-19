@@ -25,5 +25,6 @@ EXPOSE 5001
 CMD ["mlflow", "server", \
      "--backend-store-uri", "sqlite:////storage/mlflow_logs/mlflow.db", \
      "--default-artifact-root", "file:////storage/training_artifacts", \
+     "--app-name", "basic-auth", \
      "--host", "0.0.0.0", \
      "--port", "5001"]
