@@ -39,7 +39,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"user\",\n    \"password\": \"password\"\n}"
+							"raw": "{\n    \"username\": \"teacher\",\n    \"password\": \"mlet-password\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/login",
