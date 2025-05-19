@@ -21,12 +21,12 @@ print(f"Running locally: {LOCAL}")
 if LOCAL:
     ARTIFACTS_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../local_storage/training_artifacts"))
     LOGS_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../local_storage/mlflow_logs"))
-    PARAMS_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../local_storage/parameters"))
+    PARAMS_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../local_storage/params"))
     DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../local_storage/data"))
 else:
     ARTIFACTS_DIR = os.path.abspath(os.path.join("/storage/", "training_artifacts"))
     LOGS_DIR = os.path.abspath(os.path.join("/storage/", "mlflow_logs"))
-    PARAMS_DIR = os.path.abspath(os.path.join("/storage/", "parameters"))
+    PARAMS_DIR = os.path.abspath(os.path.join("/storage/", "params"))
     DATA_DIR = os.path.abspath(os.path.join("/storage/", "data"))
 
 
