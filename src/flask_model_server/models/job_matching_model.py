@@ -17,17 +17,20 @@ from config import (
     TFIDF_JOB_DESCRIPTION_NGRAM_RANGE,
     TFIDF_JOB_REQUIREMENTS_NGRAM_RANGE,
     TFIDF_CANDIDATE_CV_NGRAM_RANGE,
+    TFIDF_MIN_DF,
+    TFIDF_MAX_DF,
     GRID_SEARCH_CV,
     GRID_SEARCH_SCORING,
     GRID_SEARCH_N_JOBS,
     GRID_SEARCH_C_VALUES,
     LOGISTIC_REGRESSION_MAX_ITER,
+    LOGISTIC_REGRESSION_TOL,
 )
 
 # Configure joblib to use less memory
 joblib.parallel.BACKEND = 'loky'
 joblib.parallel.DEFAULT_N_JOBS = GRID_SEARCH_N_JOBS
-joblib.parallel.DEFAULT_MAX_NBYTES = '1G'
+joblib.parallel.DEFAULT_MAX_NBYTES = '512M'
 
 def create_pipeline(params):
     """Create the machine learning pipeline for job matching.
@@ -43,25 +46,25 @@ def create_pipeline(params):
             max_features=TFIDF_JOB_DESCRIPTION_MAX_FEATURES,
             ngram_range=TFIDF_JOB_DESCRIPTION_NGRAM_RANGE,
             strip_accents="unicode",
-            dtype=np.float32,  # Use float32 to reduce memory usage
-            min_df=2,  # Ignore terms that appear in only 1 document
-            max_df=0.95  # Ignore terms that appear in more than 95% of documents
+            dtype=np.float32,
+            min_df=TFIDF_MIN_DF,
+            max_df=TFIDF_MAX_DF
         ), "job_description"),
         ("tfidf_comp", TfidfVectorizer(
             max_features=TFIDF_JOB_REQUIREMENTS_MAX_FEATURES,
             ngram_range=TFIDF_JOB_REQUIREMENTS_NGRAM_RANGE,
             strip_accents="unicode",
-            dtype=np.float32,  # Use float32 to reduce memory usage
-            min_df=2,
-            max_df=0.95
+            dtype=np.float32,
+            min_df=TFIDF_MIN_DF,
+            max_df=TFIDF_MAX_DF
         ), "job_requirements"),
         ("tfidf_cv", TfidfVectorizer(
             max_features=TFIDF_CANDIDATE_CV_MAX_FEATURES,
             ngram_range=TFIDF_CANDIDATE_CV_NGRAM_RANGE,
             strip_accents="unicode",
-            dtype=np.float32,  # Use float32 to reduce memory usage
-            min_df=2,
-            max_df=0.95
+            dtype=np.float32,
+            min_df=TFIDF_MIN_DF,
+            max_df=TFIDF_MAX_DF
         ), "candidate_cv"),
     ], remainder="drop")
 
@@ -69,13 +72,13 @@ def create_pipeline(params):
         ("pre", preprocessor),
         ("clf", LogisticRegression(
             max_iter=LOGISTIC_REGRESSION_MAX_ITER,
-            n_jobs=1,  # Use single thread for the classifier
-            solver='saga'  # More memory efficient solver
+            n_jobs=1,
+            solver='saga',
+            tol=LOGISTIC_REGRESSION_TOL
         ))
     ])
 
     return pipeline
-
 
 def train_model(df):
     """Train the job matching model using the configured pipeline and parameters.
@@ -111,7 +114,6 @@ def train_model(df):
     print("Progress will be shown below:")
 
     try:
-        # Configure GridSearchCV with memory-efficient settings
         grid = GridSearchCV(
             pipeline,
             {"clf__C": GRID_SEARCH_C_VALUES},
@@ -120,11 +122,10 @@ def train_model(df):
             n_jobs=GRID_SEARCH_N_JOBS,
             verbose=1,
             error_score='raise',
-            pre_dispatch='2*n_jobs',  # Limit number of jobs dispatched at once
-            return_train_score=False  # Don't store training scores to save memory
+            pre_dispatch='n_jobs',
+            return_train_score=False
         )
 
-        # Fit the model with memory-efficient settings
         with joblib.parallel_backend('loky', n_jobs=GRID_SEARCH_N_JOBS):
             grid.fit(X_train, y_train)
 
