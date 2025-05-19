@@ -50,6 +50,10 @@ def save_parameters(params):
     # Create config parser
     config = configparser.ConfigParser()
     
+    # First load existing parameters if file exists
+    if os.path.exists(file_path):
+        config.read(file_path)
+    
     # Define sections and their parameters
     sections = {
         'Model': ['MODEL_VERSION'],
@@ -78,7 +82,8 @@ def save_parameters(params):
     
     # Add sections and their parameters
     for section, keys in sections.items():
-        config[section] = {}
+        if section not in config:
+            config[section] = {}
         for key in keys:
             if key in params:
                 config[section][key] = str(params[key])
