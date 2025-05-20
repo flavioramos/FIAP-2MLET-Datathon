@@ -7,30 +7,10 @@ from sklearn.pipeline import Pipeline
 import joblib
 import numpy as np
 from utils.config_loader import load_parameters
-from config import (
-    STATUS_MAP,
-    TEST_SIZE,
-    RANDOM_STATE,
-    TFIDF_JOB_DESCRIPTION_MAX_FEATURES,
-    TFIDF_JOB_REQUIREMENTS_MAX_FEATURES,
-    TFIDF_CANDIDATE_CV_MAX_FEATURES,
-    TFIDF_JOB_DESCRIPTION_NGRAM_RANGE,
-    TFIDF_JOB_REQUIREMENTS_NGRAM_RANGE,
-    TFIDF_CANDIDATE_CV_NGRAM_RANGE,
-    TFIDF_MIN_DF,
-    TFIDF_MAX_DF,
-    GRID_SEARCH_CV,
-    GRID_SEARCH_SCORING,
-    GRID_SEARCH_N_JOBS,
-    GRID_SEARCH_C_VALUES,
-    LOGISTIC_REGRESSION_MAX_ITER,
-    LOGISTIC_REGRESSION_TOL,
-)
+from config import STATUS_MAP
 
 # Configure joblib to use less memory
 joblib.parallel.BACKEND = 'loky'
-joblib.parallel.DEFAULT_N_JOBS = GRID_SEARCH_N_JOBS
-joblib.parallel.DEFAULT_MAX_NBYTES = '512M'
 
 def create_pipeline(params):
     """Create the machine learning pipeline for job matching.
@@ -43,38 +23,38 @@ def create_pipeline(params):
     """
     preprocessor = ColumnTransformer([
         ("tfidf_ativ", TfidfVectorizer(
-            max_features=TFIDF_JOB_DESCRIPTION_MAX_FEATURES,
-            ngram_range=TFIDF_JOB_DESCRIPTION_NGRAM_RANGE,
+            max_features=params['TFIDF_JOB_DESCRIPTION_MAX_FEATURES'],
+            ngram_range=params['TFIDF_JOB_DESCRIPTION_NGRAM_RANGE'],
             strip_accents="unicode",
             dtype=np.float32,
-            min_df=TFIDF_MIN_DF,
-            max_df=TFIDF_MAX_DF
+            min_df=params['TFIDF_MIN_DF'],
+            max_df=params['TFIDF_MAX_DF']
         ), "job_description"),
         ("tfidf_comp", TfidfVectorizer(
-            max_features=TFIDF_JOB_REQUIREMENTS_MAX_FEATURES,
-            ngram_range=TFIDF_JOB_REQUIREMENTS_NGRAM_RANGE,
+            max_features=params['TFIDF_JOB_REQUIREMENTS_MAX_FEATURES'],
+            ngram_range=params['TFIDF_JOB_REQUIREMENTS_NGRAM_RANGE'],
             strip_accents="unicode",
             dtype=np.float32,
-            min_df=TFIDF_MIN_DF,
-            max_df=TFIDF_MAX_DF
+            min_df=params['TFIDF_MIN_DF'],
+            max_df=params['TFIDF_MAX_DF']
         ), "job_requirements"),
         ("tfidf_cv", TfidfVectorizer(
-            max_features=TFIDF_CANDIDATE_CV_MAX_FEATURES,
-            ngram_range=TFIDF_CANDIDATE_CV_NGRAM_RANGE,
+            max_features=params['TFIDF_CANDIDATE_CV_MAX_FEATURES'],
+            ngram_range=params['TFIDF_CANDIDATE_CV_NGRAM_RANGE'],
             strip_accents="unicode",
             dtype=np.float32,
-            min_df=TFIDF_MIN_DF,
-            max_df=TFIDF_MAX_DF
+            min_df=params['TFIDF_MIN_DF'],
+            max_df=params['TFIDF_MAX_DF']
         ), "candidate_cv"),
     ], remainder="drop")
 
     pipeline = Pipeline([
         ("pre", preprocessor),
         ("clf", LogisticRegression(
-            max_iter=LOGISTIC_REGRESSION_MAX_ITER,
+            max_iter=params['LOGISTIC_REGRESSION_MAX_ITER'],
             n_jobs=1,
             solver='saga',
-            tol=LOGISTIC_REGRESSION_TOL
+            tol=params['LOGISTIC_REGRESSION_TOL']
         ))
     ])
 
@@ -88,9 +68,12 @@ def train_model(df):
                and test data for additional metrics
     """
     print("\n=== Starting Training Process ===")
+    print("Loading parameters...")
     params = load_parameters()
+    print("Parameters loaded successfully")
 
     print("\n=== Loading and Processing Data ===")
+    print(f"Total samples in dataset: {len(df)}")
 
     print("\n=== Preparing Features and Target ===")
     x = df[["job_description", "job_requirements", "candidate_cv"]]
@@ -100,45 +83,52 @@ def train_model(df):
 
     print("\n=== Splitting Data ===")
     X_train, X_test, y_train, y_test = train_test_split(
-        x, y, stratify=y, test_size=TEST_SIZE, random_state=RANDOM_STATE
+        x, y, stratify=y, test_size=params['TEST_SIZE'], random_state=params['RANDOM_STATE']
     )
     print(f"Train set size: {len(X_train)}")
     print(f"Test set size: {len(X_test)}")
 
     print("\n=== Creating Pipeline ===")
+    print("Initializing TF-IDF vectorizers...")
     pipeline = create_pipeline(params)
+    print("Pipeline created successfully")
 
     print("\n=== Starting Grid Search ===")
-    print(f"Testing C values: {GRID_SEARCH_C_VALUES}")
-    print(f"Performing {GRID_SEARCH_CV}-fold cross-validation...")
+    print(f"Testing C values: {params['GRID_SEARCH_C_VALUES']}")
+    print(f"Performing {params['GRID_SEARCH_CV']}-fold cross-validation...")
+    print(f"Using {params['GRID_SEARCH_N_JOBS']} parallel jobs")
     print("Progress will be shown below:")
 
     try:
+        print("\nInitializing GridSearchCV...")
         grid = GridSearchCV(
             pipeline,
-            {"clf__C": GRID_SEARCH_C_VALUES},
-            cv=GRID_SEARCH_CV,
-            scoring=GRID_SEARCH_SCORING,
-            n_jobs=GRID_SEARCH_N_JOBS,
-            verbose=1,
+            {"clf__C": params['GRID_SEARCH_C_VALUES']},
+            cv=params['GRID_SEARCH_CV'],
+            scoring=params['GRID_SEARCH_SCORING'],
+            n_jobs=params['GRID_SEARCH_N_JOBS'],
+            verbose=2,  # Increased verbosity
             error_score='raise',
             pre_dispatch='n_jobs',
             return_train_score=False
         )
 
-        with joblib.parallel_backend('loky', n_jobs=GRID_SEARCH_N_JOBS):
+        print("\nStarting model training...")
+        with joblib.parallel_backend('loky', n_jobs=params['GRID_SEARCH_N_JOBS']):
             grid.fit(X_train, y_train)
 
-        print(f"\nBest C value: {grid.best_params_['clf__C']}")
+        print(f"\nTraining completed!")
+        print(f"Best C value: {grid.best_params_['clf__C']}")
         print(f"Best cross-validation score: {grid.best_score_:.4f}")
 
-        print("\n=== Evaluating Model ===")
+        # Calculate AUC on test set
         y_pred = grid.predict_proba(X_test)[:, 1]
         auc = roc_auc_score(y_test, y_pred)
+        print(f"AUC on test set: {auc:.4f}")
 
         return auc, grid, X_test, y_test
 
     except Exception as e:
-        print(f"\nError during training: {str(e)}")
+        print(f"Error during training: {str(e)}")
         raise
 

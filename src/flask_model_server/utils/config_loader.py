@@ -14,27 +14,36 @@ def load_parameters():
     Returns:
         dict: Dictionary containing the loaded parameters
     """
+    config = configparser.ConfigParser()
+    params_path = os.path.join(os.path.dirname(__file__), '../default_params.txt')
+    config.read(params_path)
+
     params = {}
-    file_path = f"{PARAMS_DIR}/params.txt"
-    print(f"Loading parameters from {file_path}")
-    
-    if os.path.exists(file_path):
-        config = configparser.ConfigParser()
-        config.read(file_path)
-        
-        # Convert config sections to flat dictionary
-        for section in config.sections():
-            for key, value in config[section].items():
-                try:
-                    params[key] = int(value)
-                except ValueError:
-                    try:
-                        params[key] = float(value)
-                    except ValueError:
-                        params[key] = value
-    else:
-        print(f"File {file_path} not found. Using default parameters.")
-    
+
+    # Training
+    params['TEST_SIZE'] = float(config.get('Training', 'TEST_SIZE'))
+    params['RANDOM_STATE'] = int(config.get('Training', 'RANDOM_STATE'))
+
+    # TFIDF
+    params['TFIDF_JOB_DESCRIPTION_MAX_FEATURES'] = int(config.get('TFIDF', 'TFIDF_JOB_DESCRIPTION_MAX_FEATURES'))
+    params['TFIDF_JOB_DESCRIPTION_NGRAM_RANGE'] = eval(config.get('TFIDF', 'TFIDF_JOB_DESCRIPTION_NGRAM_RANGE'))
+    params['TFIDF_JOB_REQUIREMENTS_MAX_FEATURES'] = int(config.get('TFIDF', 'TFIDF_JOB_REQUIREMENTS_MAX_FEATURES'))
+    params['TFIDF_JOB_REQUIREMENTS_NGRAM_RANGE'] = eval(config.get('TFIDF', 'TFIDF_JOB_REQUIREMENTS_NGRAM_RANGE'))
+    params['TFIDF_CANDIDATE_CV_MAX_FEATURES'] = int(config.get('TFIDF', 'TFIDF_CANDIDATE_CV_MAX_FEATURES'))
+    params['TFIDF_CANDIDATE_CV_NGRAM_RANGE'] = eval(config.get('TFIDF', 'TFIDF_CANDIDATE_CV_NGRAM_RANGE'))
+    params['TFIDF_MIN_DF'] = int(config.get('TFIDF', 'TFIDF_MIN_DF'))
+    params['TFIDF_MAX_DF'] = float(config.get('TFIDF', 'TFIDF_MAX_DF'))
+
+    # LogisticRegression
+    params['LOGISTIC_REGRESSION_MAX_ITER'] = int(config.get('LogisticRegression', 'LOGISTIC_REGRESSION_MAX_ITER'))
+    params['LOGISTIC_REGRESSION_TOL'] = float(config.get('LogisticRegression', 'LOGISTIC_REGRESSION_TOL'))
+
+    # GridSearch
+    params['GRID_SEARCH_CV'] = int(config.get('GridSearch', 'GRID_SEARCH_CV'))
+    params['GRID_SEARCH_SCORING'] = config.get('GridSearch', 'GRID_SEARCH_SCORING')
+    params['GRID_SEARCH_N_JOBS'] = int(config.get('GridSearch', 'GRID_SEARCH_N_JOBS'))
+    params['GRID_SEARCH_C_VALUES'] = eval(config.get('GridSearch', 'GRID_SEARCH_C_VALUES'))
+
     return params
 
 

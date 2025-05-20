@@ -59,8 +59,6 @@ print(f"DATA_DIR: {DATA_DIR}")
 
 # Generated file paths
 MODEL_LOCAL_PATH = os.path.join(ARTIFACTS_DIR, "model.joblib")
-SCALER_LOCAL_PATH = os.path.join(ARTIFACTS_DIR, "scaler.pkl")
-LAST_UPDATE_FILE = os.path.join(ARTIFACTS_DIR, "last_update.txt")
 STEP_COUNT_FILE = os.path.join(ARTIFACTS_DIR, "step_count.txt")
 
 
@@ -88,37 +86,6 @@ STATUS_MAP = {
     "Encaminhar Proposta":                1,
     "Proposta Aceita":                    1
 }
-
-
-# Training parameters
-TEST_SIZE = 0.2
-RANDOM_STATE = 42
-
-
-# TF-IDF parameters
-TFIDF_JOB_DESCRIPTION_MAX_FEATURES = 480
-TFIDF_JOB_DESCRIPTION_NGRAM_RANGE = (1, 2)
-
-TFIDF_JOB_REQUIREMENTS_MAX_FEATURES = 480
-TFIDF_JOB_REQUIREMENTS_NGRAM_RANGE = (1, 2)
-
-TFIDF_CANDIDATE_CV_MAX_FEATURES = 2400
-TFIDF_CANDIDATE_CV_NGRAM_RANGE = (1, 2)
-
-TFIDF_MIN_DF = 4
-TFIDF_MAX_DF = 0.85
-
-
-# Logistic Regression parameters
-LOGISTIC_REGRESSION_MAX_ITER = 800
-LOGISTIC_REGRESSION_TOL = 2e-3
-
-
-# Grid Search parameters
-GRID_SEARCH_CV = 4
-GRID_SEARCH_SCORING = "roc_auc"
-GRID_SEARCH_N_JOBS = 2
-GRID_SEARCH_C_VALUES = [0.1, 1, 5]
 
 
 # Data paths

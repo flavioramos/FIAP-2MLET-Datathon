@@ -23,12 +23,6 @@ from utils.config_loader import load_parameters
 from utils.model_versioning import ModelVersioning
 from config import (
     LOGS_DIR, MODEL_LOCAL_PATH, STEP_COUNT_FILE, STATUS_MAP,
-    TEST_SIZE, RANDOM_STATE,
-    TFIDF_JOB_DESCRIPTION_MAX_FEATURES, TFIDF_JOB_DESCRIPTION_NGRAM_RANGE,
-    TFIDF_JOB_REQUIREMENTS_MAX_FEATURES, TFIDF_JOB_REQUIREMENTS_NGRAM_RANGE,
-    TFIDF_CANDIDATE_CV_MAX_FEATURES, TFIDF_CANDIDATE_CV_NGRAM_RANGE,
-    LOGISTIC_REGRESSION_MAX_ITER,
-    GRID_SEARCH_CV, GRID_SEARCH_SCORING, GRID_SEARCH_N_JOBS, GRID_SEARCH_C_VALUES,
     APPLICANTS_PATH, VAGAS_PATH, PROSPECTS_PATH
 )
 from models.job_matching_model import train_model
@@ -61,12 +55,12 @@ def set_step_count(step):
         f.write(str(step))
 
 def read_jsons():
-    """Read and load JSON data files.
+    """Read JSON files containing job and candidate data.
     
     Returns:
         tuple: (applicants, vagas, prospects) dictionaries
     """
-    print(f"\n=== Loading JSON files ===")
+    print("\n=== Loading JSON files ===")
     print(f"Loading applicants from: {APPLICANTS_PATH}")
     with open(APPLICANTS_PATH, encoding='utf-8') as f:
         applicants = json.load(f)
@@ -76,7 +70,6 @@ def read_jsons():
     print(f"Loading prospects from: {PROSPECTS_PATH}")
     with open(PROSPECTS_PATH, encoding='utf-8') as f:
         prospects = json.load(f)
-
     return applicants, vagas, prospects
 
 def load_and_consolidate_jsons():
@@ -163,15 +156,15 @@ def run_training():
 
         # Log model parameters
         mlflow.log_params({
-            "tfidf_job_desc_max_features": TFIDF_JOB_DESCRIPTION_MAX_FEATURES,
-            "tfidf_job_req_max_features": TFIDF_JOB_REQUIREMENTS_MAX_FEATURES,
-            "tfidf_candidate_cv_max_features": TFIDF_CANDIDATE_CV_MAX_FEATURES,
-            "test_size": TEST_SIZE,
-            "random_state": RANDOM_STATE,
-            "grid_search_cv": GRID_SEARCH_CV,
-            "grid_search_scoring": GRID_SEARCH_SCORING,
-            "grid_search_n_jobs": GRID_SEARCH_N_JOBS,
-            "logistic_regression_max_iter": LOGISTIC_REGRESSION_MAX_ITER
+            "tfidf_job_desc_max_features": params['TFIDF_JOB_DESCRIPTION_MAX_FEATURES'],
+            "tfidf_job_req_max_features": params['TFIDF_JOB_REQUIREMENTS_MAX_FEATURES'],
+            "tfidf_candidate_cv_max_features": params['TFIDF_CANDIDATE_CV_MAX_FEATURES'],
+            "test_size": params['TEST_SIZE'],
+            "random_state": params['RANDOM_STATE'],
+            "grid_search_cv": params['GRID_SEARCH_CV'],
+            "grid_search_scoring": params['GRID_SEARCH_SCORING'],
+            "grid_search_n_jobs": params['GRID_SEARCH_N_JOBS'],
+            "logistic_regression_max_iter": params['LOGISTIC_REGRESSION_MAX_ITER']
         })
 
         # Increment model version and save model
@@ -185,24 +178,13 @@ def run_training():
         ModelVersioning.update_latest_symlink(versioned_model_path)
 
         set_step_count(step + 1)
-        
+
         return {
-            "status": "Training completed successfully!",
             "model_version": model_version,
-            "auc": float(auc),
-            "best_c": float(grid.best_params_["clf__C"]),
-            "best_cv_score": float(grid.best_score_),
-            "mean_cv_score": float(grid.cv_results_["mean_test_score"].mean()),
-            "std_cv_score": float(grid.cv_results_["std_test_score"].mean()),
-            "precision": float(precision),
-            "recall": float(recall),
-            "f1_score": float(f1),
-            "accuracy": float(accuracy),
-            "confusion_matrix": {
-                "true_negatives": int(tn),
-                "false_positives": int(fp),
-                "false_negatives": int(fn),
-                "true_positives": int(tp)
-            },
-            "class_distribution": class_dist.to_dict()
+            "auc": auc,
+            "precision": precision,
+            "recall": recall,
+            "f1_score": f1,
+            "accuracy": accuracy,
+            "confusion_matrix": conf_matrix.tolist()
         }
