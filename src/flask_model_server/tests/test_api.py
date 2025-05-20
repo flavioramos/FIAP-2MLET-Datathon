@@ -1,6 +1,8 @@
 import pytest
 import json
 import configparser
+import threading
+import time
 
 # Load configuration
 config = configparser.ConfigParser()
@@ -63,5 +65,32 @@ def test_predict_endpoint_success(client, auth_headers):
         "cv_pt": "Experienced Python developer with ML background"
     }
     response = client.post("/predict", json=test_data, headers=auth_headers)
+    assert response.status_code == 200
+    assert isinstance(response.json, dict)
+
+def test_parallel_training_calls(client, auth_headers):
+    """Test parallel calls to training endpoint."""
+    def make_training_request():
+        response = client.get("/train", headers=auth_headers)
+        return response.status_code
+
+    # Start first training request
+    thread1 = threading.Thread(target=make_training_request)
+    thread1.start()
+    
+    # Wait a bit to ensure first request has started
+    time.sleep(0.5)
+    
+    # Make second request while first is still running
+    response = client.get("/train", headers=auth_headers)
+    assert response.status_code == 409  # Should get conflict status
+    assert "error" in response.json
+    assert "already in progress" in response.json["error"].lower()
+    
+    # Wait for first request to complete
+    thread1.join()
+    
+    # Verify we can make another request after the first one completes
+    response = client.get("/train", headers=auth_headers)
     assert response.status_code == 200
     assert isinstance(response.json, dict) 
