@@ -33,7 +33,7 @@ Todo o experimento é **rastreado pelo MLflow**, e a aplicação expõe uma **AP
 
 ## Arquitetura de alto nível
 
-![Diagrama do Projeto](https://lh3.googleusercontent.com/d/109wiog7azYJ41Gd0o0Os6uEbO2Xw6kET)
+![Diagrama do Projeto](https://lh3.googleusercontent.com/d/1wPE1cL4S6ShOC0MyKHsmqv8xxnTqCa5I)
 
 * **API Flask ** – expõe rota de login para obter token JWT e rotas protegidas para *train* e *predict*.
 * **Camada de ML** – pipeline de pré‑processamento + classificador definido em `models/job_matching_model.py`.
