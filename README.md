@@ -33,12 +33,7 @@ Todo o experimento é **rastreado pelo MLflow**, e a aplicação expõe uma **AP
 
 ## Arquitetura de alto nível
 
-![Diagrama do Projeto](https://lh3.googleusercontent.com/d/1wPE1cL4S6ShOC0MyKHsmqv8xxnTqCa5I)
-
-* **API Flask ** – expõe rota de login para obter token JWT e rotas protegidas para *train* e *predict*.
-* **Camada de ML** – pipeline de pré‑processamento + classificador definido em `models/job_matching_model.py`.
-* **Persistência** – modelo treinado, scaler e arquivos auxiliares são armazenados em volume compartilhado; cada versão recebe sufixo `_vN`.
-* **Observabilidade** – métricas e artefatos são enviados ao MLflow, acessível via navegador.
+![Diagrama do Projeto](https://lh3.googleusercontent.com/d/1ztSTYfbh1dFXTamK8x-mGjNjlcQ5aV-U)
 
 ---
 
@@ -46,12 +41,11 @@ Todo o experimento é **rastreado pelo MLflow**, e a aplicação expõe uma **AP
 
 ```
 ├── docker-compose.yaml            # Orquestra API Flask e MLflow
-├── .env                           # Variáveis para Docker Compose
 ├── flask_model_server/
 │   ├── app.py                     # API Flask (JWT, /train, /predict)
 │   ├── config.py                  # Diretórios, mapeamentos, hiper‑parâmetros
-│   ├── default_params.txt         # Credenciais padrão + segredos JWT
-│   ├── Dockerfile                 # Imagem da API
+│   ├── default_params.txt         # Configurações da aplicação e pipeline
+│   ├── Dockerfile                 
 │   ├── local_run.sh               # Execução local
 │   ├── local_setup.sh             # Criação do venv local
 │   ├── models/
@@ -61,13 +55,15 @@ Todo o experimento é **rastreado pelo MLflow**, e a aplicação expõe uma **AP
 │   │   └── predict.py             # Função de predição
 │   ├── utils/
 │   │   ├── config_loader.py       # Carrega / persiste parâmetros
+│   │   ├── data_utils.py          # Carrega / persiste JSONs
 │   │   └── model_versioning.py    # Versionamento de modelos
-│   └── tests/                     # Pytest para API e lógica
+│   ├── tests/                     # Pytest para API e lógica
+│   └── requirements.txt           # Lista de dependências
 └── mlflow_server/                 # Container e scripts do MLflow
     ├── Dockerfile
-    ├── local_run.sh
-    ├── local_setup.sh
-    └── requirements.txt
+    ├── local_run.sh               # Execução local
+    ├── local_setup.sh             # Criação do venv local
+    └── requirements.txt           # Lista de dependências
 ```
 
 ---
@@ -85,7 +81,7 @@ Todo o experimento é **rastreado pelo MLflow**, e a aplicação expõe uma **AP
 
 ```bash
 # Na raiz do projeto
-docker compose up --build
+docker-compose up --build
 ```
 
 * `flask_model_server` → [http://localhost:5000](http://localhost:5000)
@@ -93,9 +89,10 @@ docker compose up --build
 
 Volumes persistem:
 
+* Dados em JSON (`data/`)
 * Artefatos do modelo (`training_artifacts/`)
 * Logs do MLflow (`mlflow_logs/`)
-* Parâmetros da aplicação (`parameters/params.txt`)
+* Parâmetros da aplicação (`params/`)
 
 ### Execução local
 
@@ -148,7 +145,7 @@ cd ../mlflow_server
 
 ## Parâmetros e personalização
 
-Todos os parâmetros estão em `flask_model_server/config.py` ou em `default_params.txt` (copiado para `parameters/params.txt` na primeira execução).
+Todos os parâmetros estão em `default_params.txt` (copiado para `parameters/params.txt` na primeira execução).
 Altere valores como:
 
 * `TFIDF_JOB_DESCRIPTION_MAX_FEATURES`, `TFIDF_CANDIDATE_CV_MAX_FEATURES`
@@ -162,7 +159,7 @@ Para persistir alterações, edite `parameters/params.txt` (carregado por `confi
 ## Monitoramento com MLflow
 
 * **Experimentos** – Cada execução do `/train` cria um *run* no MLflow com métricas (AUC, precisão, recall, F1, etc.), hiper‑parâmetros e artefatos.
-* **Download de modelos** – A interface web permite baixar qualquer versão treinada.
+* **Download de modelos** – Os arquivos joblib são versionados, permitindo recuperar qualquer versão.
 
 Acesse em \`http://localhost:5001\`.
 
