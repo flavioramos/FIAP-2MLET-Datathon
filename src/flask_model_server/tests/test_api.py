@@ -1,11 +1,16 @@
 import pytest
 import json
+import configparser
+
+# Load configuration
+config = configparser.ConfigParser()
+config.read('default_params.txt')
 
 def test_login_success(client):
     """Test successful login."""
     response = client.post("/login", json={
-        "username": "user",
-        "password": "password"
+        "username": config.get('Authentication', 'DEFAULT_USERNAME'),
+        "password": config.get('Authentication', 'DEFAULT_PASSWORD')
     })
     assert response.status_code == 200
     assert "access_token" in response.json
@@ -53,8 +58,9 @@ def test_predict_endpoint_missing_data(client, auth_headers):
 def test_predict_endpoint_success(client, auth_headers):
     """Test predict endpoint with valid data."""
     test_data = {
-        "job_description": "Python developer with 5 years experience",
-        "candidate_cv": "Experienced Python developer with ML background"
+        "principais_atividades": "Python developer with 5 years experience",
+        "competencia_tecnicas_e_comportamentais": "Experienced Python developer with ML background",
+        "cv_pt": "Experienced Python developer with ML background"
     }
     response = client.post("/predict", json=test_data, headers=auth_headers)
     assert response.status_code == 200
