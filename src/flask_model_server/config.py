@@ -59,7 +59,6 @@ print(f"DATA_DIR: {DATA_DIR}")
 
 # Generated file paths
 MODEL_LOCAL_PATH = os.path.join(ARTIFACTS_DIR, "model.joblib")
-STEP_COUNT_FILE = os.path.join(ARTIFACTS_DIR, "step_count.txt")
 
 
 # Status mapping

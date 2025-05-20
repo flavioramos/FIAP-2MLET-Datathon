@@ -22,6 +22,7 @@ def load_parameters():
 
     # Model
     params['MODEL_VERSION'] = int(config.get('Model', 'MODEL_VERSION', fallback='0'))
+    params['STEP_COUNT'] = int(config.get('Model', 'STEP_COUNT', fallback='0'))
 
     # Training
     params['TEST_SIZE'] = float(config.get('Training', 'TEST_SIZE'))
@@ -68,7 +69,7 @@ def save_parameters(params):
     
     # Define sections and their parameters
     sections = {
-        'Model': ['MODEL_VERSION'],
+        'Model': ['MODEL_VERSION', 'STEP_COUNT'],
         'Training': ['DATA_GDRIVE_FILE_ID', 'TEST_SIZE', 'RANDOM_STATE'],
         'TFIDF': [
             'TFIDF_JOB_DESCRIPTION_MAX_FEATURES',

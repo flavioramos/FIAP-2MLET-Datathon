@@ -19,10 +19,10 @@ from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-from utils.config_loader import load_parameters
+from utils.config_loader import load_parameters, save_parameters
 from utils.model_versioning import ModelVersioning
 from config import (
-    LOGS_DIR, MODEL_LOCAL_PATH, STEP_COUNT_FILE, STATUS_MAP,
+    LOGS_DIR, MODEL_LOCAL_PATH, STATUS_MAP, PARAMS_DIR,
     APPLICANTS_PATH, VAGAS_PATH, PROSPECTS_PATH
 )
 from models.job_matching_model import train_model
@@ -32,27 +32,23 @@ mlflow.set_tracking_uri("sqlite:///" + os.path.join(LOGS_DIR, "mlflow.db"))
 mlflow.set_experiment("job_matching")
 
 def get_step_count():
-    """Get the current training step count.
+    """Get the current training step count from params.txt.
     
     Returns:
         int: Current step count, or 0 if not found
     """
-    if os.path.exists(STEP_COUNT_FILE):
-        try:
-            with open(STEP_COUNT_FILE, "r") as f:
-                return int(f.read().strip())
-        except Exception:
-            pass
-    return 0
+    params = load_parameters()
+    return int(params.get('STEP_COUNT', 0))
 
 def set_step_count(step):
-    """Set the current training step count.
+    """Set the current training step count in params.txt.
     
     Args:
         step (int): Step count to save
     """
-    with open(STEP_COUNT_FILE, "w") as f:
-        f.write(str(step))
+    params = load_parameters()
+    params['STEP_COUNT'] = str(step)
+    save_parameters(params)
 
 def read_jsons():
     """Read JSON files containing job and candidate data.
@@ -177,6 +173,7 @@ def run_training():
         # Update the latest model symlink
         ModelVersioning.update_latest_symlink(versioned_model_path)
 
+        # Increment step
         set_step_count(step + 1)
 
         return {

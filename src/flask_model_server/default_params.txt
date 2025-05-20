@@ -1,6 +1,7 @@
 [Model]
 # Model versioning
 MODEL_VERSION=0
+TRAINING_STEP=0
 
 [Training]
 # Data source
