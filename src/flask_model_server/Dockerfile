@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     python3-dev \
     build-essential \
+    vim \
     && rm -rf /var/lib/apt/lists/*
 
 # Define the working directory
