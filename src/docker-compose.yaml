@@ -11,6 +11,7 @@ services:
       - training_artifacts:/storage/training_artifacts
       - mlflow_logs:/storage/mlflow_logs
       - parameters:/storage/parameters
+      - data:/storage/data
 
   mlflow_server:
     build:
@@ -21,8 +22,10 @@ services:
     volumes:
       - training_artifacts:/storage/training_artifacts
       - mlflow_logs:/storage/mlflow_logs
+      - data:/storage/data
 
 volumes:
   mlflow_logs: 
   training_artifacts: 
   parameters:
+  data:
