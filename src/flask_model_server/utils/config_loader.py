@@ -15,10 +15,13 @@ def load_parameters():
         dict: Dictionary containing the loaded parameters
     """
     config = configparser.ConfigParser()
-    params_path = os.path.join(os.path.dirname(__file__), '../default_params.txt')
+    params_path = os.path.join(PARAMS_DIR, 'params.txt')
     config.read(params_path)
 
     params = {}
+
+    # Model
+    params['MODEL_VERSION'] = int(config.get('Model', 'MODEL_VERSION', fallback='0'))
 
     # Training
     params['TEST_SIZE'] = float(config.get('Training', 'TEST_SIZE'))

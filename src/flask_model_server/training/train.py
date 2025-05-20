@@ -125,10 +125,10 @@ def run_training():
 
         # Get predictions for additional metrics
         y_pred_proba = grid.predict_proba(X_test)[:, 1]
-        y_pred = (y_pred_proba > 0.5).astype(int)  # Convert probabilities to binary predictions
+        y_pred = (y_pred_proba > 0.3).astype(int)  # Using a lower threshold of 0.3
 
         # Calculate metrics
-        precision = precision_score(y_test, y_pred)
+        precision = precision_score(y_test, y_pred, zero_division=0)
         recall = recall_score(y_test, y_pred)
         f1 = f1_score(y_test, y_pred)
         accuracy = accuracy_score(y_test, y_pred)

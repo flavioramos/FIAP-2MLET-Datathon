@@ -4,7 +4,10 @@ MODEL_VERSION=0
 
 [Training]
 # Data source
-DATA_GDRIVE_FILE_ID=14RDmgVVHg6limnuS14PXaI3lHVP_gd1z
+DATA_GDRIVE_FILE_ID=10zrQw_0yJb3g1XNFgQfnTWXYULa3trgc
+# Full: 14RDmgVVHg6limnuS14PXaI3lHVP_gd1z
+# Light: 10zrQw_0yJb3g1XNFgQfnTWXYULa3trgc
+
 
 # Training parameters
 TEST_SIZE=0.2
