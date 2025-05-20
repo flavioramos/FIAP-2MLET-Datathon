@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "945d12b2-7419-41d1-a9b7-5fdd3aace877",
-		"name": "Flask Model Server",
+		"_postman_id": "153350ab-47b4-458f-81a0-9bc825256ae3",
+		"name": "Prod - FIAP - Datathon - Flavio Ramos",
 		"description": "Collection for the Flask Model Server API endpoints",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "384806"
@@ -119,7 +119,7 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "http://localhost:5000",
+			"value": "http://flavioramos.ddns.net:63888",
 			"type": "string"
 		},
 		{
